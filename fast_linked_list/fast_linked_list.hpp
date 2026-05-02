@@ -1,3 +1,6 @@
+#ifndef FAST_LINKED_LIST_HPP
+#define FAST_LINKED_LIST_HPP
+
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -663,17 +666,18 @@ void fast_linked_list<T>::pop_front() {
 
 template<typename T>
 void fast_linked_list<T>::pop_last_accessed() {
-
-    //assertions
     assert((n_elements >= 0 && "INTERNAL ERROR- Number of elements cannot be negative"));
-    assert((last_used_index >= 0 && last_used_index < n_elements && "INTERNAL ERROR- Last accessed index out of range"));
 
     //no elements: throw exception
     if(n_elements == 0) {
         throw std::out_of_range("Cannot remove the last accessed element of an empty list");
     }
+    
+    //this doesn't apply if there are 0 elements
+    assert((last_used_index >= 0 && last_used_index < n_elements && "INTERNAL ERROR- Last accessed index out of range"));
+
     //single element
-    else if(n_elements == 1) {
+    if(n_elements == 1) {
         //delete the only node
         Node* delete_node = start_node;
         delete delete_node;
@@ -900,3 +904,4 @@ std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>&
 
 
 }
+#endif

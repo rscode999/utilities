@@ -1,4 +1,4 @@
-#include "fast_linked_list.cpp"
+#include "fast_linked_list.hpp"
 #include <iostream>
 #include <string>
 

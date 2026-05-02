@@ -882,7 +882,7 @@ public:
      * @return `output_stream` containing the array's information inside
      */
     template<typename CharT, typename Traits, typename Tp>
-    friend std::basic_ostream<Tp>& operator<<(std::basic_ostream<CharT, Traits>& output_stream, const segmented_array<Tp>& arr);
+    friend std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& output_stream, const segmented_array<Tp>& arr);
 
 
     //////////////////////////////////////////////////////////
@@ -903,7 +903,7 @@ public:
 
 
 template<typename CharT, typename Traits, typename T>
-std::basic_ostream<T>& operator<<(std::basic_ostream<CharT, Traits>& output_stream, const segmented_array<T>& arr) {
+std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& output_stream, const segmented_array<T>& arr) {
     for(int64_t i = 0; i < arr.size(); i++) {
         output_stream << arr.contents[i];
     }

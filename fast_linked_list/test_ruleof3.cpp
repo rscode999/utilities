@@ -1,5 +1,5 @@
 #include <iostream>
-#include "fast_linked_list.cpp"
+#include "fast_linked_list.hpp"
 
 using namespace std;
 using namespace utils;

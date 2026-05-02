@@ -1,4 +1,4 @@
-#include "segmented_array.cpp"
+#include "segmented_array.hpp"
 #include <iostream>
 
 /**
