@@ -297,7 +297,7 @@ void test_copyconstructor_one_empty() {
     }
 
     empty.push_back(1);
-    cout << "Deep copy check, should stlil be empty: " << empty2 << endl;
+    cout << "Deep copy check, should still be empty: " << empty2 << endl;
 }
 
 

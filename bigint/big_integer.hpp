@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <compare>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -82,7 +83,7 @@ private:
      * 
      * Mutates `digit_storage`.
      * @param digit_storage_index index to set in `digit_storage`. Must be on the interval [0, `DIGITS_PER_STORAGE` - 1]
-     * @param digit_storage 32-bit integer to set value in
+     * @param digit_storage 8-bit integer to set value in
      * @param new_value value to set `digit_storage[digit_storage_index]` to. Must be on the interval [0, 9]
      */
     void set_storage_value_at(int32_t digit_storage_index, uint32_t& digit_storage, int32_t new_value) {
@@ -177,8 +178,6 @@ private:
 
 public:
 
-    friend class big_integer; //Declare self as friend
-
     /**
      * Creates a Big Integer with value 0.
      */
@@ -220,11 +219,11 @@ public:
             assert(48 <= initial_value[i] && initial_value[i] <= 57 && "All characters in the initial value (except for the negative sign) must be digits");
             
             //Put least significant digit in the lowest storage index
-            set_storage_value_at(n_digits % DIGITS_PER_STORAGE, contents[n_digits / DIGITS_PER_STORAGE], (int)(initial_value[i] - 48));
+            set_storage_value_at(n_digits % DIGITS_PER_STORAGE, contents[n_digits / DIGITS_PER_STORAGE], (char)(initial_value[i] - 48));
             
             //Increase number of digits, and add another storage integer if necessary
             n_digits++;
-            if(n_digits % 8 == 0 && n_digits > 0) {
+            if(n_digits % DIGITS_PER_STORAGE == 0 && n_digits > 0) {
                 contents.push_back(0);
             }
         }
@@ -246,7 +245,7 @@ public:
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @return number of digits in this Big Integer
+     * @return number of base-10 digits in this Big Integer
      */
     int32_t digits() const;
 
@@ -271,20 +270,27 @@ public:
      * Returns whether this Big Integer is equal to `other`.
      * @return if `this` == `other`
      */
-    constexpr bool operator==(const big_integer& other) const;
+    bool operator==(const big_integer& other) const;
 
-        /**
+    /**
      * Returns whether this Big Integer is not equal to `other`.
      * @return if `this` != `other`
      */
-    constexpr bool operator!=(const big_integer& other) const;
+    bool operator!=(const big_integer& other) const;
 
     /**
      * Performs a comparison between this Big Integer and `other`, returning the result as a `std::strong_ordering`.
      * @param other Big Integer to compare to
      * @return comparison result (greater than, less than, greater than or equal to, etc.)
      */
-    constexpr std::strong_ordering operator<=>(const big_integer& other) const; //the operator is defined
+    std::strong_ordering operator<=>(const big_integer& other) const; //the operator is defined
+
+    /**
+     * Performs a comparison between this Big Integer and `other`, returning the result as a `std::strong_ordering`.
+     * @param other integer to compare to
+     * @return comparison result (greater than, less than, greater than or equal to, etc.)
+     */
+    std::strong_ordering operator<=>(int64_t other) const; //the operator is defined
 
     /**
      * Returns the sum of this Big Integer and `other`.
@@ -294,10 +300,23 @@ public:
     big_integer operator+(const big_integer& other) const;
 
     /**
+     * Returns the sum of this Big Integer and `other`.
+     * @param other integer to add to this object
+     * @return this object + `other`
+     */
+    big_integer operator+(int64_t other) const;
+
+    /**
      * Adds `other` to this Big Integer.
      * @param other Big Integer to add
      */
     void operator+=(const big_integer& other);
+
+    /**
+     * Adds `other` to this Big Integer.
+     * @param other integer to add
+     */
+    void operator+=(int64_t other);
 
     /**
      * `++i` operator: Prefix-increments this Big Integer by 1.
@@ -312,10 +331,23 @@ public:
     big_integer operator-(const big_integer& other) const;
 
     /**
+     * Returns the difference of this Big Integer and `other`.
+     * @param other integer to subtract from this object
+     * @return this object minus `other`
+     */
+    big_integer operator-(int64_t other) const;
+
+    /**
      * Subtracts `other` from this Big Integer.
      * @param other Big Integer to subtract
      */
     void operator-=(const big_integer& other);
+
+    /**
+     * Subtracts `other` from this Big Integer.
+     * @param other integer to subtract
+     */
+    void operator-=(int64_t other);
 
     /**
      * `--i` operator: Prefix-decrements this Big Integer by 1.
@@ -330,15 +362,28 @@ public:
     big_integer operator*(const big_integer& other) const;
 
     /**
+     * Returns the product of this Big Integer and `other`.
+     * @param other integer to multiply this object by
+     * @return this object * `other`
+     */
+    big_integer operator*(int64_t other) const;
+
+    /**
      * Multiplies `other` by this Big Integer.
      * @param other Big Integer to multiply
      */
     void operator*=(const big_integer& other);
 
     /**
+     * Multiplies `other` by this Big Integer.
+     * @param other integer to multiply
+     */
+    void operator*=(int64_t other);
+
+    /**
      * Returns the quotient of this Big Integer and `other`. Throws `std::out_of_range` if `other` is 0.
      * 
-     * Integer division rounds down.
+     * Integer division rounds towards 0.
      * 
      * @param other Big Integer to divide this object by
      * @return this object / `other`
@@ -347,14 +392,35 @@ public:
     big_integer operator/(const big_integer& other) const;
 
     /**
+     * Returns the quotient of this Big Integer and `other`. Throws `std::out_of_range` if `other` is 0.
+     * 
+     * Integer division rounds towards 0.
+     * 
+     * @param other integer to divide this object by
+     * @return this object / `other`
+     * @throws `std::out_of_range` in case of division by zero
+     */
+    big_integer operator/(int64_t other) const;
+
+    /**
      * Divides `other` by this Big Integer. Throws `std::out_of_range` if `other` is 0.
      * 
-     * Integer division rounds down.
+     * Integer division rounds towards 0.
      * 
      * @param other Big Integer to divide
      * @throws `std::out_of_range` in case of division by zero
      */
     void operator/=(const big_integer& other);
+
+    /**
+     * Divides `other` by this Big Integer. Throws `std::out_of_range` if `other` is 0.
+     * 
+     * Integer division rounds towards 0.
+     * 
+     * @param other integer to divide
+     * @throws `std::out_of_range` in case of division by zero
+     */
+    void operator/=(int64_t  other);
 
     /**
      * Exports `i` to the output stream `output_stream`, returning a reference to `output_stream` with `i` inserted in it.
@@ -678,7 +744,7 @@ int64_t big_integer::to_integer() const {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-constexpr bool big_integer::operator==(const big_integer& other) const {
+bool big_integer::operator==(const big_integer& other) const {
     //Opposite negative polarities: Cannot be equal
     if(this->negative != other.negative) {
         return false;
@@ -700,14 +766,36 @@ constexpr bool big_integer::operator==(const big_integer& other) const {
 }
 
 
-
-constexpr bool big_integer::operator!=(const big_integer& other) const {
-    return !(*this == other);
+/**
+ * Returns whether `lhs` (as a Big Integer) equals `rhs`.
+ * @param lhs left-hand side of the comparison
+ * @param rhs right-hand side of the comparison
+ * @return true if `lhs` equals `rhs`, false otherwise
+ */
+bool operator==(int64_t lhs, const big_integer& rhs) {
+    return rhs == big_integer(lhs);
 }
 
 
 
-constexpr std::strong_ordering big_integer::operator<=>(const big_integer& other) const {
+bool big_integer::operator!=(const big_integer& other) const {
+    return !(*this == other);
+}
+
+
+/**
+ * Returns whether `lhs` (as a Big Integer) does not equal `rhs`.
+ * @param lhs left-hand side of the comparison
+ * @param rhs right-hand side of the comparison
+ * @return true if `lhs` does not equal `rhs`, false otherwise
+ */
+bool operator!=(int64_t lhs, const big_integer& rhs) {
+    return rhs != big_integer(lhs);
+}
+
+
+
+std::strong_ordering big_integer::operator<=>(const big_integer& other) const {
 
     //Positive > negative
     if(!this->negative && other.negative) {
@@ -753,6 +841,22 @@ constexpr std::strong_ordering big_integer::operator<=>(const big_integer& other
 }
 
 
+std::strong_ordering big_integer::operator<=>(int64_t other) const {
+    return *this <=> big_integer(other);
+}
+
+
+/**
+ * Performs a comparison between `lhs` and `rhs`, returning the result as a `std::strong_ordering`.
+ * @param `lhs` left-hand side of the comparison
+ * @param `rhs` right-hand side of the comparison
+ * @return comparison result (greater than, less than, greater than or equal to, etc.)
+ */
+std::strong_ordering operator<=>(int64_t lhs, const big_integer& rhs) {
+    return big_integer(lhs) <=> rhs;
+}
+
+
 
 big_integer big_integer::operator+(const big_integer &other) const {
     //Negative signs have the same polarity: Add absolute values, then give the result the same sign
@@ -791,9 +895,30 @@ big_integer big_integer::operator+(const big_integer &other) const {
 }
 
 
+big_integer big_integer::operator+(int64_t other) const {
+    return *this + big_integer(other);
+}
+
+
+/**
+ * Returns the sum of `lhs_addend` (as a Big Integer) and `rhs_addend`.
+ * @param lhs_addend left-hand side of the addition
+ * @param rhs_addend right-hand side of the addition
+ * @return `lhs_addend` + `rhs_addend`
+ */
+big_integer operator+(int64_t lhs_addend, const big_integer& rhs_addend) {
+    return rhs_addend + lhs_addend; //order must be reversed to avoid operator overload errors
+}
+
+
 
 inline void big_integer::operator+=(const big_integer& other) {
     *this = *this + other;
+}
+
+
+inline void big_integer::operator+=(int64_t other) {
+    *this = *this + big_integer(other);
 }
 
 
@@ -823,9 +948,30 @@ big_integer big_integer::operator-(const big_integer& other) const {
 }
 
 
+big_integer big_integer::operator-(int64_t other) const {
+    return *this - big_integer(other);
+}
+
+
+/**
+ * Returns the difference of `minuend` (as a Big Integer) and `subtrahend`.
+ * @param minuend starting number
+ * @param subtrahend number to subtract from `minuend`
+ * @return `minuend` minus `subtrahend`
+ */
+big_integer operator-(int64_t minuend, const big_integer& subtrahend) {
+    return big_integer(minuend) - subtrahend;
+}
+
+
 
 void big_integer::operator-=(const big_integer& other) {
     *this = *this - other;
+}
+
+
+void big_integer::operator-=(int64_t other) {
+    *this = *this - big_integer(other);
 }
 
 
@@ -863,9 +1009,30 @@ big_integer big_integer::operator*(const big_integer& other) const {
 }
 
 
+big_integer big_integer::operator*(int64_t other) const {
+    return *this * big_integer(other);
+}
+
+
+/**
+ * Returns the product of `lhs_factor` (as a Big Integer) and `rhs_factor`.
+ * @param lhs_factor left-hand side of the multiplication
+ * @param rhs_factor right-hand side of the multiplication
+ * @return `lhs_factor` * `rhs_factor`
+ */
+big_integer operator*(int64_t lhs_factor, const big_integer& rhs_factor) {
+    return rhs_factor * lhs_factor;
+}
+
+
 
 void big_integer::operator*=(const big_integer& other) {
     *this = *this * other;
+}
+
+
+void big_integer::operator*=(int64_t other) {
+    *this = *this * big_integer(other);
 }
 
 
@@ -875,25 +1042,44 @@ big_integer big_integer::operator/(const big_integer& other) const {
         throw std::out_of_range("Cannot divide by zero");
     }
 
+    //Handle 0 as a special case
+    if(*this == big_integer(0)) {
+        return big_integer(0);
+    }
+
     big_integer output;
     big_integer count = abs(*this);
     const big_integer abs_other = abs(other);
 
-    const big_integer one = big_integer(1);
-    while(count > one) {
+    do {
+        count = count - abs_other;
         ++output;
-        count -= abs_other;
+        // std::cout << count << std::endl;
     }
-
-    if(count > one) {
-        --output;
-    }
+    while(count >= abs_other);
 
     //Negate if operands' negative polarities are opposite, and result is nonzero
-    if(this->negative != other.negative && output != 0) {
+    if(this->negative != other.negative && output != big_integer(0)) {
         output.negative = true;
     }
     return output;
+}
+
+
+
+big_integer big_integer::operator/(int64_t other) const {
+    return *this / big_integer(other);
+}
+
+
+/**
+ * Returns the division of `dividend` (as a Big Integer) by `divisor`. Integer division rounds towards 0.
+ * @param dividend initial number to divide
+ * @param divisor number to divide by
+ * @return `dividend` / `divisor`
+ */
+big_integer operator/(int64_t dividend, const big_integer& divisor) {
+    return big_integer(dividend) / divisor;
 }
 
 
@@ -903,13 +1089,20 @@ void big_integer::operator/=(const big_integer& other) {
 }
 
 
+void big_integer::operator/=(int64_t other) {
+    *this = *this / big_integer(other);
+}
+
+
 
 template<typename CharT, typename Traits>
 std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& output_stream, const big_integer& i) {
 
+    const CharT negative_sign[] = {CharT('-'), CharT('\0')};
+
     //Export the negative sign
     if(i.negative) {
-        output_stream << '-';
+        output_stream << negative_sign;
     }
 
     //Get and export each digit individually

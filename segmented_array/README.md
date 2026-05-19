@@ -1,7 +1,7 @@
 # Segmented Array
-Space-efficient array that divides its data into segments
+Space-efficient vector that divides its data into segments.
 
-Valid only for the types `char` and `wchar_t`. Any other type will cause an assertion error upon creation.
+Valid only for the types `char` and `wchar_t`. Any other type will cause a compilation error.
 
 A segmented array with limited functionality was used in some cryptographic processes. 
 

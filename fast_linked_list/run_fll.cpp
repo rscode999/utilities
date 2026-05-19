@@ -27,7 +27,7 @@ int main() {
     using namespace utils;
 
 
-    fast_linked_list<char> test_list = fast_linked_list<char>();
+    fast_linked_list<char> test_list;
 
     /*
     commands:

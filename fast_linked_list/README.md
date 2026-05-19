@@ -24,8 +24,6 @@ Possible commands:
 - s:  set  
 
 ### Test Instructions
-Compile and run `test_fll.cpp` ("Test Fast Linked List") for the C++11 standard. 
+All testing has been completed using `run_fll.cpp`. 
 
-Any method that begins with a capital letter is a testing function.
-
-Some of the tests are not complete. All testing has previously been done using `run_fll.cpp`, so there is no need to use additional tests.
+Rule of 3 testing methods are in `test_ruleof3.cpp`. Uncomment testing methods in the `main` function, at the bottom of the file, to run tests.

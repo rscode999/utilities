@@ -1,3 +1,5 @@
+// #define NDEBUG
+
 #include "segmented_array.hpp"
 #include <iostream>
 

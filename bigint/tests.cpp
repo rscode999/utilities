@@ -107,12 +107,7 @@ void test_add() {
 
     //Many-digit add
     i = big_integer(23);
-    j = big_integer(45);
-    cout << (i + j) << "\n" << endl; //69 (nice)
-
-    //Many-digit add
-    i = big_integer(23);
-    j = big_integer(45);
+    j = big_integer(46);
     cout << (i + j) << "\n" << endl; //69 (nice)
 
     //i has more digits than j
@@ -391,6 +386,9 @@ void test_compare() {
     cout << (i > j) << endl; //0
     cout << (i >= j) << "\n" << endl; //0
 
+    //Divider
+    cout << "-------------\n" << endl;
+
     //Negative < positive even if absolute values are equal
     i = big_integer(-20);
     j = big_integer(20);
@@ -566,7 +564,7 @@ void test_multiply() {
     j = big_integer(213);
     result = i * j;
     cout << result << endl; //-33228
-    cout << result.digits() << "\n" << endl; //3
+    cout << result.digits() << "\n" << endl; //5
 
     //Multiply by 1
     i = big_integer(1);
@@ -614,6 +612,20 @@ void test_divide() {
     cout << result << endl; //2
     cout << result.digits() << "\n" << endl; //1
 
+    //Divide by 1
+    i = big_integer(100);
+    j = big_integer(1);
+    result = i / j;
+    cout << result << endl; //100
+    cout << result.digits() << "\n" << endl; //3
+
+    //1 / 1
+    i = big_integer(1);
+    j = big_integer(1);
+    result = i / j;
+    cout << result << endl; //1
+    cout << result.digits() << "\n" << endl; //1
+
     //Negative / positive
     i = big_integer(-228);
     j = big_integer(19);
@@ -625,7 +637,7 @@ void test_divide() {
     i = big_integer(1550);
     j = big_integer(-4);
     result = i / j;
-    cout << result << endl; //388
+    cout << result << endl; //-387
     cout << result.digits() << "\n" << endl; //3
 
     //0 / negative

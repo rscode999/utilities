@@ -152,34 +152,40 @@ void test_equals_operator() {
     //equal
     segmented_array<char> a1 = segmented_array<char>("abcdefghijklmnopqrstuvwxyz", 5);
     segmented_array<char> a2 = segmented_array<char>("abcdefghijklmnopqrstuvwxyz", 5);
-    cout << "Expected: 1" << endl;
+    cout << "Expected: 1, 0" << endl;
     cout << (a1 == a2) << endl;
+    cout << (a1 != a2) << endl;
 
     //different lengths
     a2 = segmented_array<char>("abcdefghijklmnopqrstuvwxy", 5);
-    cout << "Expected: 0" << endl;
+    cout << "Expected: 0, 1" << endl;
     cout << (a1 == a2) << endl;
+    cout << (a1 != a2) << endl;
 
     //different amount of elements per segment
     a2 = segmented_array<char>("abcdefghijklmnopqrstuvwxyz", 1);
-    cout << "Expected: 0" << endl;
+    cout << "Expected: 0, 1" << endl;
     cout << (a1 == a2) << endl;
+    cout << (a1 != a2) << endl;
 
 
     //one mismatched element
     a2 = segmented_array<char>("Abcdefghijklmnopqrstuvwxyz", 5);
-    cout << "Expected: 0" << endl;
+    cout << "Expected: 0, 1" << endl;
     cout << (a1 == a2) << endl;
+    cout << (a1 != a2) << endl;
 
     //                              *
     a2 = segmented_array<char>("abcdEfghijklmnopqrstuvwxyz", 5);
-    cout << "Expected: 0" << endl;
+    cout << "Expected: 0, 1" << endl;
     cout << (a1 == a2) << endl;
+    cout << (a1 != a2) << endl;
 
     //                                                   *
     a2 = segmented_array<char>("abcdefghijklmnopqrstuvwxyZ", 5);
-    cout << "Expected: 0" << endl;
+    cout << "Expected: 0, 1" << endl;
     cout << (a1 == a2) << endl;
+    cout << (a1 != a2) << endl;
 }
 
 

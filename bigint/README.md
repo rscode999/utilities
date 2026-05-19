@@ -12,9 +12,9 @@ Using a base larger than 10 allows for storing higher values more compactly. I d
 
 A key requirement of a big integer class is to convert to and from standard integer types, such as `int64_t`.
 
- The problem with base>10 is that large bases prevent conversion to a base-10 integer. When converting base-N to base-10, the least significant digit has a base-10 value of N, the second least significant digit has a value of N^2, the third has value N^3, and so on.
+ The problem with bases larger than 10 is that large bases prevent conversion to a base-10 integer. When converting base-N to base-10, the least significant digit has a base-10 value of N, the second least significant digit has a value of N^2, the third has value N^3, and so on.
  
- Given arbitrarily many digits, the base-10 value of one of the converted digits will exceed the limits of any integer type, making the number impossible to convert to base-10. Printing the number to the standard output requires that the number be in a base-10 representation, so any base larger than 10 will make the integer type useless.
+ Given arbitrarily many digits, the base-10 value of one of the converted digits will exceed the 64-bit integer limit, making the number impossible to convert to base-10. Printing the number to the standard output requires that the number be in a base-10 representation, so any base larger than 10 will make the integer type useless.
 
 </details>
 

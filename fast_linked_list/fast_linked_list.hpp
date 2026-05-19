@@ -5,6 +5,13 @@
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
+
+
+
+namespace utils {
+
+
 
 
 /**
@@ -19,20 +26,11 @@ inline int32_t distance(int32_t a, int32_t b) {
 }
 
 
-
-
-namespace utils {
-
-
-
-
 /**
- * Linked list that supports addition and removal at both the front and the back.
+ * Doubly linked list that supports addition and removal at both the front and the back.
  * 
  * The list maintains a reference to the most recently used element for faster operations.
- * 
  * The previously used element can be changed by reading or writing to a list element that is not the first or last element.
- * If the previously accessed element is removed, the new previous element becomes the one at the start or end of the list.
  * 
  * @param T datatype of the stored items
  */
@@ -177,9 +175,20 @@ public:
      * @param setting_last_accessed whether to change the last accessed value to the one at `index`
      * @return value at the specified index
      * @throws `std::out_of_range` if `index` is out of the array's bounds
-     * 
      */
     T& at(int32_t index, bool setting_last_accessed = true);
+
+    /**
+     * Returns a constant reference to the value at index `index` (0-based indexing).
+     * The last accessed index is not changed.
+     * 
+     * If `index` is negative or at least the list's size, throws `std::out_of_range`.
+     * 
+     * @param index index to get value from
+     * @return value at the specified index
+     * @throws `std::out_of_range` if `index` is out of the array's bounds
+     */
+    const T& at(int32_t index) const;
 
     /**
      * Returns the index number of the element (0-based indexing) last retrieved or modified.
@@ -189,7 +198,7 @@ public:
      * @return index of the element marked for quick access
      * @throws `std::out_of_range` if the list is empty
      */
-    int32_t last_accessed_index();
+    int32_t last_accessed_index() const;
 
     /**
      * Returns a reference to the element last retrieved or modified.
@@ -200,6 +209,16 @@ public:
      * @throws `std::out_of_range` if the list is empty
      */
     T& last_accessed_element();
+
+    /**
+     * Returns a reference to the element last retrieved or modified.
+     * 
+     * If the list is empty, throws `std::out_of_range`.
+     * 
+     * @return reference to the element marked for quick access
+     * @throws `std::out_of_range` if the list is empty
+     */
+    const T& last_accessed_element() const;
 
     /**
      * Removes the final element of the list.
@@ -269,7 +288,6 @@ public:
      */
     void push_last_accessed(T new_value);
 
-
     /**
      * Sets the value at index `index` (0-based indexing) to `new_value`.
      * If `setting_last_accessed` is true, the last accessed index will be set to `index`.
@@ -288,10 +306,9 @@ public:
     void set(int32_t index, T new_value, bool setting_last_accessed = true);
 
     /**
-     * 
-     * @return the number of elements in the list
+     * @return number of elements in the list
      */
-    int32_t size(); 
+    int32_t size() const; 
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -403,7 +420,18 @@ public:
         return true;
     }
 
-
+    /**
+     * Returns whether this list is not equal to `other_list`.
+     * 
+     * The lists are equal if this list and `other_list` have the same number of elements,
+     * and each corresponding element is equal.
+     * 
+     * @param other_list list to compare to
+     * @return whether the lists are not equal
+     */
+    bool operator!=(const fast_linked_list& other_list) const {
+        return !(*this == other_list);
+    }
 
     /**
      * Returns a non-constant reference to the value at index `index` (0-based indexing), and sets the last accessed value to the one at `index`.
@@ -416,10 +444,25 @@ public:
      * @param index the index to get the value from
      * @return reference to value at index `index`
      * @throws `out_of_range` if `index` is out of the array's bounds
-     * 
      */
     T& operator[](int32_t index) {
         return at(index, true);
+    }
+
+    /**
+     * Returns a constant reference to the value at index `index` (0-based indexing).
+     * If `index` is negative or at least the list's size, throws `out_of_range`.
+     * 
+     * The last accessed value is not changed.
+     * 
+     * Equivalent to `{listName}.at(index)`.
+     * 
+     * @param index the index to get the value from
+     * @return reference to value at index `index`
+     * @throws `out_of_range` if `index` is out of the array's bounds
+     */
+    const T& operator[](int32_t index) const {
+        return at(index);
     }
 
 
@@ -469,7 +512,7 @@ public:
 
 
 template<typename T>
-typename fast_linked_list<T>::Node* fast_linked_list<T>::get_list_position(int32_t index) const {
+inline fast_linked_list<T>::Node* fast_linked_list<T>::get_list_position(int32_t index) const {
     assert((n_elements >= 0 && "INTERNAL ERROR- Number of elements cannot be negative"));
     assert((index >= 0 && index < n_elements && "INTERNAL ERROR- index is out of bounds"));
     assert((last_used_node != nullptr && "INTERNAL ERROR- Last accessed node cannot be null"));
@@ -562,7 +605,24 @@ T& fast_linked_list<T>::at(int32_t index, bool setting_last_accessed) {
 
 
 template<typename T>
-inline int32_t fast_linked_list<T>::last_accessed_index() {
+const T& fast_linked_list<T>::at(int32_t index) const {
+    //check index range
+    if(!(index >= 0 && index < n_elements)) {
+        throw std::out_of_range("Element retrieval index must be at least 0 and less than the array's size");
+    }
+
+    //Get node at the desired position
+    Node* position = get_list_position(index);
+
+    //Take data from the node and return it
+    T& data = position->data;
+    return data;
+}
+
+
+
+template<typename T>
+inline int32_t fast_linked_list<T>::last_accessed_index() const {
     //check for empty list
     if(n_elements == 0) {
         throw std::out_of_range("Cannot access the last accessed index of an empty list");
@@ -577,6 +637,20 @@ inline int32_t fast_linked_list<T>::last_accessed_index() {
 
 template<typename T>
 inline T& fast_linked_list<T>::last_accessed_element() {
+    //check for empty list
+    if(n_elements == 0) {
+        throw std::out_of_range("Cannot access the last used element of an empty list");
+    }
+    //check index range
+    assert((last_used_index >= 0 && last_used_index < n_elements && "INTERNAL ERROR- Last accessed index out of range"));
+
+    return last_used_node->data;
+}
+
+
+
+template<typename T>
+inline const T& fast_linked_list<T>::last_accessed_element() const {
     //check for empty list
     if(n_elements == 0) {
         throw std::out_of_range("Cannot access the last used element of an empty list");
@@ -868,7 +942,7 @@ void fast_linked_list<T>::set(int32_t index, T new_value, bool setting_last_acce
 
 
 template<typename T>
-inline int32_t fast_linked_list<T>::size() {
+inline int32_t fast_linked_list<T>::size() const {
     return n_elements;
 }
 

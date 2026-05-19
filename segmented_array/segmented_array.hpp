@@ -1,5 +1,4 @@
-//Uncomment to disable assertions.
-// #define NDEBUG
+#pragma once
 
 #include <cassert>
 #include <cstdint>
@@ -94,6 +93,7 @@ private:
     void _assert_valid_index(int32_t segment_number, int32_t elem_number) const {
         //Automatic exit if assertions are disabled
         #ifndef NDEBUG
+
             //Check for integer overflow
             assert(n_segments >= 0 && "(POSSIBLE INTEGER OVERFLOW) Number of segments must be non-negative");
             assert(n_elems_per_segment > 0 && "(POSSIBLE INTEGER OVERFLOW) Number of elements per segment must be positive");
@@ -358,9 +358,9 @@ public:
      * 
      * @param segments number of segments in the array. Must be non-negative
      * @param elements_per_segment number of elements per segment in the array. Must be positive
-     * @param remainder_size number of elements in the remainder. Must be non-negative and less than `elements_per_segment`. Default: 0
+     * @param remainder_size number of elements in the remainder. Must be non-negative and less than `elements_per_segment`
      */
-    segmented_array(int32_t segments, int32_t elements_per_segment, int32_t remainder_size = 0) {
+    segmented_array(int32_t segments, int32_t elements_per_segment, int32_t remainder_size) {
         using namespace std;
         static_assert(is_same<T, char>::value || is_same<T, wchar_t>::value, "The array is for types `char` and `wchar_t` only");
         assert((segments >= 0 && "Segments must be non-negative"));
@@ -500,7 +500,7 @@ public:
      */
     const T& char_at(int32_t segment_number, int32_t element_number) const noexcept {
         _assert_valid_index(segment_number, element_number);
-        return contents[n_elems_per_segment*segment_number + element_number];
+        return contents[(int64_t)n_elems_per_segment*(int64_t)segment_number + (int64_t)element_number];
     }
 
     /**
@@ -516,7 +516,7 @@ public:
      */
     T& char_at(int32_t segment_number, int32_t element_number) noexcept {
         _assert_valid_index(segment_number, element_number);
-        return contents[n_elems_per_segment*segment_number + element_number];
+        return contents[(int64_t)n_elems_per_segment*(int64_t)segment_number + (int64_t)element_number];
     }
 
 
@@ -534,7 +534,7 @@ public:
      */
     int32_t int_value_at(int32_t segment_number, int32_t element_number) const noexcept {
         _assert_valid_index(segment_number, element_number);
-        return (int32_t)contents[n_elems_per_segment*segment_number + element_number];
+        return (int32_t)contents[(int64_t)n_elems_per_segment*(int64_t)segment_number + (int64_t)element_number];
     }
     
     
@@ -809,6 +809,21 @@ public:
     }
 
 
+
+    /**
+     * Returns whether this array is not equal to `other_array`.
+     * 
+     * This array and `other_array` are equal if this array and `other_array` are equal in length, 
+     * have the same number of elements per segment, and have equal corresponding elements.
+     * 
+     * @param other_array array to compare to this array
+     * @return true if arrays are not equal, false otherwise
+     */
+    bool operator!=(const segmented_array& other_array) const {
+        return !(*this == other_array);
+    }
+
+    
 
     /**
      * Adds `new_char` to the end of the array.
