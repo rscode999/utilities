@@ -11,7 +11,7 @@ namespace utils {
 
 
 /**
- * A 2D resizeable array that stores data of type `char` or `wchar_t` only.
+ * A 2D resizeable array that stores data of type `char`, `wchar_t`, `char8_t`, `char16_t`, or `char32_t` only.
  * 
  * Data is divided into segments of a set length. Segment and element indexing is 0-based.
  * 
@@ -26,7 +26,7 @@ namespace utils {
  * 
  * Uses a pointer to an array to store its contents. This is not a linked list
  * 
- * @param T datatype (either `char` or `wchar_t`) stored in the array
+ * @param T datatype (`char`, `wchar_t`, `char8_t`, `char16_t`, or `char32_t`) stored in the array
  */
 template <typename T> 
 class segmented_array {
@@ -362,7 +362,7 @@ public:
      */
     segmented_array(int32_t segments, int32_t elements_per_segment, int32_t remainder_size) {
         using namespace std;
-        static_assert(is_same<T, char>::value || is_same<T, wchar_t>::value, "The array is for types `char` and `wchar_t` only");
+        static_assert(is_same<T, char>::value || is_same<T, wchar_t>::value || is_same<T, char8_t>::value || is_same<T, char16_t>::value || is_same<T, char32_t>::value, "The array is for types `char`, `wchar_t`, `char8_t`, `char16_t`, `char32_t` only");
         assert((segments >= 0 && "Segments must be non-negative"));
         assert((elements_per_segment > 0 && "Elems. per segment must be positive"));
         assert((remainder_size >= 0 && "Remainder size cannot be negative"));
@@ -395,7 +395,7 @@ public:
      */
     segmented_array(const std::basic_string<T>& initial_contents, int32_t elements_per_segment) {
         using namespace std;
-        static_assert(is_same<T, char>::value || is_same<T, wchar_t>::value, "The array is for types `char` and `wchar_t` only");
+        static_assert(is_same<T, char>::value || is_same<T, wchar_t>::value || is_same<T, char8_t>::value || is_same<T, char16_t>::value || is_same<T, char32_t>::value, "The array is for types `char`, `wchar_t`, `char8_t`, `char16_t`, `char32_t` only");
         assert(elements_per_segment > 0 && "Number of elements per segment must be positive");
 
         //Allocate contents. If an error occurs, throw a runtime error
@@ -890,11 +890,13 @@ public:
     /**
      * Exports the in-order contents of `arr` to the output stream `output_stream`, returning a reference to `output_stream` with `arr` added.
      * 
-     * Equivalent to `output_stream << arr.to_string()`.
+     * If the template type of `output_stream` and `arr` are different, the contents of `arr` become their Unicode numerical values.
+     * 
+     * Equivalent to `output_stream << arr.to_string()`, assuming the stream and array template types match.
      * 
      * @param output_stream output stream to export to
      * @param arr Segmented Array to export
-     * @return `output_stream` containing the array's information inside
+     * @return `output_stream` containing the array's data inside
      */
     template<typename CharT, typename Traits, typename Tp>
     friend std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& output_stream, const segmented_array<Tp>& arr);
@@ -919,9 +921,21 @@ public:
 
 template<typename CharT, typename Traits, typename T>
 std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& output_stream, const segmented_array<T>& arr) {
-    for(int64_t i = 0; i < arr.size(); i++) {
-        output_stream << arr.contents[i];
+    
+    //Stream type matches array type: export as normal
+    if constexpr(std::is_same_v<T, CharT>) { 
+        for(int64_t i = 0; i < arr.size(); i++) {
+            output_stream << arr.contents[i];
+        }
     }
+    //Mismatch: export as numerical values
+    else {
+        for(int64_t i = 0; i < arr.size() - 1; i++) {
+            output_stream << static_cast<uint32_t>(arr.contents[i]) << CharT(' ');
+        }
+        output_stream << static_cast<uint32_t>(arr.contents[arr.size() - 1]);
+    }
+
     return output_stream;
 }
 

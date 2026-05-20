@@ -260,7 +260,6 @@ public:
     /**
      * Adds `new_value` to the end of the list.
      * @param new_value value to add to the end
-     * 
     */
     void push_back(T new_value);
 
@@ -270,7 +269,6 @@ public:
      * The last accessed index will increase by 1. The last accessed value remains the same.
      * 
      * @param new_value value to add to the end
-     * 
      */
     void push_front(T new_value);
 
@@ -301,7 +299,6 @@ public:
      * @param new_value value to set
      * @param setting_last_accessed whether to change the last accessed value to the one at `index`. Default: true
      * @throws `std::out_of_range` if `index` is out of the array's bounds
-     * 
      */
     void set(int32_t index, T new_value, bool setting_last_accessed = true);
 
